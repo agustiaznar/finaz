@@ -18,7 +18,9 @@ def init_db():
     )
     """)
 
-    cursor.execute("INSERT OR IGNORE INTO clients (id, name) VALUES (1, 'demo')")
+    cursor.execute(
+        "INSERT OR IGNORE INTO clients (id, name) VALUES (1, 'demo')"
+    )
 
     conn.commit()
     conn.close()
