@@ -1,24 +1,21 @@
 import sqlite3
 from pathlib import Path
 
-
 # =========================
-# 📁 PATH DB (COMPATIBLE CLOUD)
+# 📁 PATH DB (CLOUD SAFE)
 # =========================
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-DB_PATH = BASE_DIR / "finazdb.db"   # ← importante: sin /data/
-
+DB_PATH = BASE_DIR / "finazdb.db"
 
 # =========================
-# 🔌 CONEXIÓN
+# 🔌 CONNECTION
 # =========================
 
 def get_connection():
     conn = sqlite3.connect(DB_PATH, check_same_thread=False)
     conn.row_factory = sqlite3.Row
     return conn
-
 
 # =========================
 # 🧱 INIT DB
@@ -39,7 +36,7 @@ def init_db():
     """)
 
     # =========================
-    # TRANSACTIONS (MEJOR QUE ledger)
+    # TRANSACTIONS
     # =========================
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS transactions (
@@ -76,12 +73,24 @@ def init_db():
     """)
 
     # =========================
-    # ÍNDICE PARA EVITAR DUPLICADOS
+    # ÍNDICE (ANTI DUPLICADOS)
     # =========================
     cursor.execute("""
     CREATE UNIQUE INDEX IF NOT EXISTS idx_unique_tx
     ON transactions(description, amount, date, profile)
     """)
+
+    # =========================
+    # 🌱 SEED INICIAL (CLAVE)
+    # =========================
+    cursor.execute("SELECT COUNT(*) FROM clients")
+    count = cursor.fetchone()[0]
+
+    if count == 0:
+        cursor.execute(
+            "INSERT INTO clients (name) VALUES (?)",
+            ("default",)
+        )
 
     conn.commit()
     conn.close()
